@@ -63,74 +63,81 @@ import time
 import uuid
 
 
-def read(filename):
-    with open(filename, 'rb') as f:
-        # Read the binary stream header. Fixed size of 128 bytes. Padded with
-        # extra integers.
-        header = struct.unpack('<3I16s4I7f1Q12I', f.read(128))
+def read_stream(f):
+    """Read a take binary data stream file (mStream format). The stream file
+    contains a header that defines the number of node and channels followed by
+    the pool of measurement data.
 
-        # Verify the magic header bytes. Sanity check.
-        if header[0] != 0xFF787878 or header[1] != 0x05397A69:
-            raise ValueError(
-                "missing take file format signature in \"{}\"".format(
-                    filename))
+    with open('data.mStream') as f:
+        info, node_list, data = read_stream(f)
+    """
 
-        # Require take stream version 2 or 3.
-        if header[2] not in (2, 3):
-            raise ValueError(
-                "missing take file format version in \"{}\"".format(
-                    filename))
+    # Read the binary stream header. Fixed size of 128 bytes. Padded with
+    # extra integers.
+    header = struct.unpack('<3I16s4I7f1Q12I', f.read(128))
 
-        # There are a variable number of node key/mask integer pairs after the
-        # fixed length header. 8 bytes * number of nodes.
-        num_node = header[4]
-        node_list = struct.unpack(
-            '{}I'.format(2 * num_node),
-            f.read(8 * num_node))
+    # Verify the magic header bytes. Sanity check.
+    if header[0] != 0xFF787878 or header[1] != 0x05397A69:
+        raise ValueError(
+            "missing take file format signature in \"{}\"".format(
+                filename))
 
-        # The frame count may or may not be present since this is a streaming
-        # format.
-        num_frame = header[6]
-        if 0 == num_frame:
-            pos = f.tell()
-            f.seek(0, 2)
-            data_bytes = f.tell() - pos
-            f.seek(pos)
+    # Require take stream version 2 or 3.
+    if header[2] not in (2, 3):
+        raise ValueError(
+            "missing take file format version in \"{}\"".format(
+                filename))
 
-            if data_bytes % header[5] == 0:
-                num_frame = int(data_bytes / header[5])
+    # There are a variable number of node key/mask integer pairs after the
+    # fixed length header. 8 bytes * number of nodes.
+    num_node = header[4]
+    node_list = struct.unpack(
+        '{}I'.format(2 * num_node),
+        f.read(8 * num_node))
 
-        info = {
-            'version': header[2],
-            'uuid': str(uuid.UUID(bytes=header[3])),
-            'num_node': num_node,
-            'frame_stride': header[5],
-            'num_frame': num_frame,
-            'channel_mask': header[7],
-            'h': header[8],
-            'location': header[9:12],
-            'geomagnetic': header[12:15],
-            'timestamp': str(
-                datetime.fromtimestamp(header[15]) +
-                timedelta(microseconds=header[16])
-            )
-        }
+    # The frame count may or may not be present since this is a streaming
+    # format.
+    num_frame = header[6]
+    if num_frame == 0:
+        pos = f.tell()
+        f.seek(0, 2)
+        data_bytes = f.tell() - pos
+        f.seek(pos)
 
-        # The rest of the data is a pool of single precision floats.
-        data = array.array('f', f.read())
+        if data_bytes % header[5] == 0:
+            num_frame = int(data_bytes / header[5])
 
-        return info, node_list, data
+    info = {
+        'version': header[2],
+        'uuid': str(uuid.UUID(bytes=header[3])),
+        'num_node': num_node,
+        'frame_stride': header[5],
+        'num_frame': num_frame,
+        'channel_mask': header[7],
+        'h': header[8],
+        'location': header[9:12],
+        'geomagnetic': header[12:15],
+        'timestamp': str(
+            datetime.fromtimestamp(header[15]) +
+            timedelta(microseconds=header[16])
+        ),
+        'flags': header[17]
+    }
 
-    return None
+    # The rest of the data is a pool of single precision floats.
+    data = array.array('f', f.read())
+
+    return info, node_list, data
 
 
-def make_node_map(filename, node_list):
+def make_node_map(f, node_list):
     """Read a take JSON document (mTake format) and create a lookup list of
     string named nodes and channels into the big pool of take data. Use the
     channel names from the take document. Use the channel masks from the
     node_list which is from the take data stream header itself.
 
-    make_node_map('take.mTake', [1, 256, 2, 1024, 3, 256, ...])
+    with open('take.mTake') as f:
+        node_map = make_node_map(f, [1, 256, 2, 1024, 3, 256, ...])
 
     Generates a nested dict object. The first level are the node ids. The
     second level are the channel names and global offsets into the big frame
@@ -155,8 +162,7 @@ def make_node_map(filename, node_list):
     # Parse the JSON take definition to get the node key to id name mapping.
     # Also grab the names as well.
     #
-    with open(filename) as f:
-        tree = json.load(f)
+    tree = json.load(f)
 
     #
     # Flat list of the key, id, and name fields for each node in the take. This
@@ -238,7 +244,8 @@ def find_newest_take(name=None):
         prefix = os.path.join(prefix, date)
 
         #
-        # Search for the largest take number in the take/YYYY-MM-DD/nnnn folders.
+        # Search for the largest take number in the take/YYYY-MM-DD/nnnn
+        # folders.
         #
         number = ''
         with os.scandir(prefix) as it:

@@ -27,17 +27,18 @@
 import unittest
 import array
 
-import take_io
+import shadow.fileio
 
 
 class TestTakeIO(unittest.TestCase):
 
     def test_read(self):
-        prefix = take_io.find_newest_take()
+        prefix = shadow.fileio.find_newest_take()
 
         self.assertIsInstance(prefix, str)
 
-        info, node_list, data = take_io.read('{}/data.mStream'.format(prefix))
+        with open('{}/data.mStream'.format(prefix), 'rb') as f:
+            info, node_list, data = shadow.fileio.read_stream(f)
 
         self.assertIsInstance(info, dict)
         self.assertIsInstance(node_list, tuple)
@@ -58,8 +59,8 @@ class TestTakeIO(unittest.TestCase):
         self.assertEqual(len(info.get('location')), 3)
         self.assertEqual(len(info.get('geomagnetic')), 3)
 
-        node_map = take_io.make_node_map(
-            '{}/take.mTake'.format(prefix), node_list)
+        with open('{}/take.mTake'.format(prefix)) as f:
+            node_map = shadow.fileio.make_node_map(f, node_list)
 
         self.assertIsInstance(node_map, dict)
 
