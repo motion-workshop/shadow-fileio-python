@@ -5,12 +5,12 @@
 # Each take is stored in a folder. The folders are named by date and with an
 # ascending number for that day.
 #
-#   ~/Document/Motion/take/2019-06-26/0001
+#   ~/Documents/Motion/take/2019-06-26/0001
 #
 # Inside the take folder there are at least three files.
 #
 #    take.mTake
-#    configration.mNode
+#    configuration.mNode
 #    data.mStream
 #
 # The mTake format (JSON) describes the recording, its time stamps and
@@ -261,5 +261,5 @@ def main():
     print(find_newest_take())
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
