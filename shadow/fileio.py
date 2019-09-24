@@ -118,7 +118,7 @@ def read_stream(f):
         'location': header[9:12],
         'geomagnetic': header[12:15],
         'timestamp': str(
-            datetime.fromtimestamp(header[15]) +
+            datetime.utcfromtimestamp(header[15]) +
             timedelta(microseconds=header[16])
         ),
         'flags': header[17]

@@ -29,7 +29,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="shadow.fileio",
-    version="0.0.1",
+    version="0.0.2",
     packages=find_packages(),
     author="Motion Workshop",
     author_email="info@motionshadow.com",
