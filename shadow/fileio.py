@@ -56,6 +56,7 @@
 import array
 from datetime import datetime, timedelta
 import json
+import math
 import os
 import re
 import struct
@@ -121,6 +122,10 @@ def read_stream(f):
         ),
         'flags': header[17]
     }
+
+    # Imprecise conversion of the float time step. Round off to 0.01.
+    if math.isclose(info.get('h', 0.01), 0.01, rel_tol=1e-6):
+        info['h'] = 0.01
 
     # The rest of the data is a pool of single precision floats.
     data = array.array('f', f.read())

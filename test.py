@@ -59,8 +59,14 @@ class TestTakeIO(unittest.TestCase):
         self.assertIsInstance(info.get('timestamp'), str)
 
         self.assertEqual(info.get('num_node', 0) * 2, len(node_list))
+        self.assertEqual(info.get('h'), 0.01)
         self.assertEqual(len(info.get('location')), 3)
         self.assertEqual(len(info.get('geomagnetic')), 3)
+
+        # num_frame * frame_stride / sizeof(float) == len(data)
+        self.assertEqual(
+            int(info.get('num_frame', 0) * info.get('frame_stride', 0) / 4),
+            len(data))
 
         with open('{}/take.mTake'.format(prefix)) as f:
             node_map = shadow.fileio.make_node_map(f, node_list)
