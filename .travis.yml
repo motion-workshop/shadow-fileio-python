@@ -5,9 +5,16 @@ dist: xenial
 
 language: python
 
+# Install the codecov pip dependency.
+install: pip install codecov
+
 # Download some take data and place in a ~/Documents/Motion folder.
 before_script:
-  - wget https://storage.googleapis.com/motionshadow/shadow-fileio-bob-testdata.zip -O /tmp/testdata.zip
+  - wget https://storage.googleapis.com/motionshadow/shadow-fileio-testdata.zip -O /tmp/testdata.zip
   - unzip /tmp/testdata.zip -d ~/
 
-script: python -m unittest
+# Run unit test and collect coverage data.
+script: coverage run test.py
+
+# Push the coverage results.
+after_success: codecov
