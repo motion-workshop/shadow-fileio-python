@@ -12,7 +12,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -28,14 +28,14 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name="shadow.fileio",
-    version="0.0.2",
+    name='shadow.fileio',
+    version='0.0.3',
     packages=find_packages(),
-    author="Motion Workshop",
-    author_email="info@motionshadow.com",
-    url="https://github.com/motion-workshop/shadow-fileio-python",
-    license="BSD",
-    description="Shadow File IO",
-    long_description="",
-    platforms="any"
+    author='Motion Workshop',
+    author_email='info@motionshadow.com',
+    url='https://github.com/motion-workshop/shadow-fileio-python',
+    license='BSD',
+    description='Shadow File IO',
+    long_description='',
+    platforms='any'
 )
