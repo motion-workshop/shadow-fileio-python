@@ -24,8 +24,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import unittest
 import array
+import io
+import os
+import struct
+import unittest
 
 import shadow.fileio
 
@@ -82,6 +85,34 @@ class TestTakeIO(unittest.TestCase):
                 self.assertIsInstance(channel[1], int)
 
                 self.assertLess(channel[0], channel[1])
+
+        # Trim off the YYYY-MM-DD/NNNN portion of the take path prefix. Use it
+        # to test the other variant of find_newest_take that part of the path.
+        a, number = os.path.split(prefix)
+        b, date = os.path.split(a)
+
+        prefix_name = shadow.fileio.find_newest_take(
+            os.path.join(date, number))
+
+        self.assertIsInstance(prefix_name, str)
+
+        self.assertEqual(prefix, prefix_name)
+
+        # Read the stream so we can mess it up for testing.
+        with open('{}/data.mStream'.format(prefix), 'rb') as f:
+            buf = f.read()
+
+        # Incorrect format.
+        bad_buf = int(1).to_bytes(4, byteorder='little') + buf[4:]
+        with io.BytesIO(bad_buf) as f:
+            with self.assertRaises(ValueError):
+                shadow.fileio.read_stream(f)
+
+        # Incorrect version header.
+        bad_buf = buf[0:8] + int(1).to_bytes(4, byteorder='little') + buf[12:]
+        with io.BytesIO(bad_buf) as f:
+            with self.assertRaises(ValueError):
+                shadow.fileio.read_stream(f)
 
 
 if __name__ == '__main__':

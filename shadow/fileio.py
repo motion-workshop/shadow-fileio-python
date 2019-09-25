@@ -79,14 +79,12 @@ def read_stream(f):
     # Verify the magic header bytes. Sanity check.
     if header[0] != 0xFF787878 or header[1] != 0x05397A69:
         raise ValueError(
-            "missing take file format signature in \"{}\"".format(
-                filename))
+            "missing take file format signature, invalid mStream file")
 
     # Require take stream version 2 or 3.
     if header[2] not in (2, 3):
         raise ValueError(
-            "missing take file format version in \"{}\"".format(
-                filename))
+            "invalid take file format version, unsupported mStream file")
 
     # There are a variable number of node key/mask integer pairs after the
     # fixed length header. 8 bytes * number of nodes.
@@ -262,11 +260,3 @@ def find_newest_take(name=None):
         prefix = os.path.join(prefix, name)
 
     return str(os.path.normpath(prefix))
-
-
-def main():
-    print(find_newest_take())
-
-
-if __name__ == '__main__':
-    main()
