@@ -104,9 +104,24 @@ class TestTakeIO(unittest.TestCase):
 
         self.assertEqual(prefix, prefix_name)
 
-        # Read the stream so we can mess it up for testing.
+        # Read the stream into memory so we can mess it up for testing.
         with open('{}/data.mStream'.format(prefix), 'rb') as f:
             buf = f.read()
+
+        # Read one frame at a time.
+        with io.BytesIO(buf) as f:
+            # Just read the header portion of the stream.
+            info, node_list = shadow.fileio.read_header(f)
+
+            self.assertIsInstance(info, dict)
+            self.assertIsInstance(node_list, tuple)
+
+            # Read one frame at a time.
+            for i in range(info.get('num_frame', 0)):
+                frame = shadow.fileio.read_frame(f, info)
+                self.assertEqual(
+                    int(info.get('frame_stride', 0) / 4),
+                    len(frame))
 
         # Incorrect format.
         bad_buf = int(1).to_bytes(4, byteorder='little') + buf[4:]

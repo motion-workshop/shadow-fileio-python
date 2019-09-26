@@ -64,13 +64,14 @@ import time
 import uuid
 
 
-def read_stream(f):
-    """Read a take binary data stream file (mStream format). The stream file
-    contains a header that defines the number of node and channels followed by
-    the pool of measurement data.
+def read_header(f):
+    """Read a take binary data stream header (mStream format). The file stream
+    is advanced to the start of the measurement data. This is intended for use
+    with either streaming or in memory loading of the data after the header is
+    processed.
 
     with open('data.mStream') as f:
-        info, node_list, data = read_stream(f)
+        info, node_list = read_header(f)
     """
 
     # Read the binary stream header. Fixed size of 128 bytes. Padded with
@@ -127,10 +128,35 @@ def read_stream(f):
     if math.isclose(info.get('h', 0.01), 0.01, rel_tol=1e-6):
         info['h'] = 0.01
 
+    return info, node_list
+
+
+def read_stream(f):
+    """Read a take binary data stream file (mStream format). The stream file
+    contains a header that defines the number of node and channels followed by
+    the pool of measurement data.
+
+    with open('data.mStream') as f:
+        info, node_list, data = read_stream(f)
+    """
+    info, node_list = read_header(f)
+
     # The rest of the data is a pool of single precision floats.
     data = array.array('f', f.read())
 
     return info, node_list, data
+
+
+def read_frame(f, info):
+    """Read one frame of binary data into an array of floats. Advances the file
+    position. Uses the info.frame_stride field to detect the number of bytes in
+    one frame.
+
+    with open('data.mStream') as f:
+        info, node_list = read_header(f)
+        frame = read_frame(f, info)
+    """
+    return array.array('f', f.read(info.get('frame_stride', 0)))
 
 
 def make_node_map(f, node_list):
