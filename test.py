@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019, Motion Workshop
+# Copyright (c) 2021, Motion Workshop
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
 import array
 import io
 import os
-import struct
 import unittest
 
 import shadow.fileio

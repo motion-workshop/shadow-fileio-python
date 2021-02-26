@@ -1,7 +1,7 @@
 #
 # Travis CI config file. Build and run unit tests on Linux.
 #
-dist: xenial
+dist: focal
 
 language: python
 

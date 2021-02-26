@@ -11,6 +11,8 @@ Python module to read a Shadow take.
 ## Quick Start
 
 ```python
+import shadow.fileio
+
 # Search for the most recent take in our ~/Documents/Motion folder.
 prefix = shadow.fileio.find_newest_take()
 
