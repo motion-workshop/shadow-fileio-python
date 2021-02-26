@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2019, Motion Workshop
+# Copyright (c) 2021, Motion Workshop
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='shadow.fileio',
-    version='0.0.4',
+    version='0.0.5',
     packages=find_packages(),
     author='Motion Workshop',
     author_email='info@motionshadow.com',
