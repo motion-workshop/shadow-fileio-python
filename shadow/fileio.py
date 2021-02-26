@@ -83,17 +83,19 @@ def read_header(f):
             "missing take file format signature, invalid mStream file")
 
     # Require take stream version 2, 3, or 4.
-    if header[2] not in (2, 3, 4):
+    version = header[2]
+    if version not in (2, 3, 4):
         raise ValueError(
             "invalid take file format version, unsupported mStream file")
 
     # There are a variable number of node key/mask integer pairs after the
     # fixed length header.
     num_node = header[4]
-    if header[0] >= 4:
+    if version >= 4:
         # Take version 4
         node_list = [0] * 2 * num_node
         for i in range(num_node):
+            # Each node has a fixed size 32 byte header.
             node = struct.unpack('<3I16sI', f.read(32))
             node_list[2 * i + 0] = node[0]
             node_list[2 * i + 1] = node[1]
@@ -118,7 +120,7 @@ def read_header(f):
             num_frame = int(data_bytes / header[5])
 
     info = {
-        'version': header[2],
+        'version': version,
         'uuid': str(uuid.UUID(bytes=header[3])),
         'num_node': num_node,
         'frame_stride': header[5],
